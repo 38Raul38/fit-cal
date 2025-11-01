@@ -1,1 +1,10 @@
-<Solution />
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FitCal.Application/FitCal.Application.csproj" />
+    <Project Path="src/FitCal.Core/FitCal.Core.csproj" />
+    <Project Path="src/FitCal.Infrastructure/FitCal.Infrastructure.csproj" />
+    <Project Path="src/FitCal.Persistence/FitCal.Persistence.csproj" />
+    <Project Path="src/FitCal.WebAPI/FitCal.WebAPI.csproj" />
+    <Project Path="src\FitCal.AppHost\FitCal.AppHost.csproj" />
+  </Folder>
+</Solution>
