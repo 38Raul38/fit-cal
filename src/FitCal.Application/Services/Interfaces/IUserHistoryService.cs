@@ -6,28 +6,17 @@ namespace FitCal.Application.Services.Interfaces;
 public interface IUserHistoryService
 {
     // Добавить запись в историю питания (дата + продукт + пользователь), вернуть запись с UserHistoryId и Food (как FoodResponseDTO)
-    Task<UserHistoryResponseDTO> AddUserHistoryRecordAsync(
-        UserHistoryRequestDTO record,
-        CancellationToken ct = default);
-
+    Task<UserHistoryResponseDTO> AddUserHistoryRecordAsync(UserHistoryRequestDTO record);
+        
     // Получить запись истории по UserHistoryId
-    Task<UserHistoryResponseDTO> GetUserHistoryRecordByIdAsync(
-        int userHistoryId,
-        CancellationToken ct = default);
+    Task<UserHistoryResponseDTO> GetUserHistoryRecordByIdAsync(int userHistoryId);
 
     // Получить все записи истории пользователя
-    Task<IReadOnlyList<UserHistoryResponseDTO>> GetUserHistoryAsync(
-        int userInformationId,
-        CancellationToken ct = default);
+    Task<IReadOnlyList<UserHistoryResponseDTO>> GetUserHistoryAsync(int userInformationId);
 
     // Получить записи истории пользователя за конкретную дату
-    Task<IReadOnlyList<UserHistoryResponseDTO>> GetUserHistoryByDateAsync(
-        int userInformationId,
-        DateTime journalDate,
-        CancellationToken ct = default);
+    Task<IReadOnlyList<UserHistoryResponseDTO>> GetUserHistoryByDateAsync(int userInformationId, DateTime journalDate);
 
     // Удалить запись истории по UserHistoryId
-    Task RemoveUserHistoryRecordAsync(
-        int userHistoryId,
-        CancellationToken ct = default);
+    Task RemoveUserHistoryRecordAsync(int userHistoryId);
 }
