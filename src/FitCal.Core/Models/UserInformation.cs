@@ -19,5 +19,4 @@ public class UserInformation
 
     // Связь с отчетами
     public virtual ICollection<Report> Reports { get; set; } = [];
-    
 }
