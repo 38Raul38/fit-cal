@@ -7,10 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Data\DTO\Request\" />
-    <Folder Include="Data\DTO\Response\" />
     <Folder Include="MappingConfigurations\" />
-    <Folder Include="Services\" />
     <Folder Include="Utils\" />
   </ItemGroup>
 
