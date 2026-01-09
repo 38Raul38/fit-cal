@@ -3,7 +3,7 @@ using FitCal.Application.Data.DTO.Response;
 using FitCal.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FitCal.WebAPI.Controllers;
+namespace FitCal.WebAPI.Middlewares;
 
 [ApiController]
 [Route("api/[controller]")]

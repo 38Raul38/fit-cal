@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Extentions\" />
-    <Folder Include="Middlewares\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,6 +15,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FitCal.Application\FitCal.Application.csproj" />
   </ItemGroup>
 
 </Project>
