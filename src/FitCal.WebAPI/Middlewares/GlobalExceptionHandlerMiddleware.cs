@@ -1,68 +1,86 @@
-﻿using FitCal.Application.Data.DTO.Request;
-using FitCal.Application.Data.DTO.Response;
-using FitCal.Application.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
+using System.Text.Json;
 
-namespace FitCal.WebAPI.Middlewares;
-
-[ApiController]
-[Route("api/[controller]")]
-public class FoodController : ControllerBase
+public class GlobalExceptionHandlerMiddleware
 {
-    private readonly IFoodService _foodService;
+    private readonly RequestDelegate _next;
+    private readonly ILogger<GlobalExceptionHandlerMiddleware> _logger;
 
-    public FoodController(IFoodService foodService)
+    public GlobalExceptionHandlerMiddleware(
+        RequestDelegate next, 
+        ILogger<GlobalExceptionHandlerMiddleware> logger)
     {
-        _foodService = foodService;
+        _next = next;
+        _logger = logger;
     }
 
-    // POST: api/food
-    [HttpPost]
-    [ProducesResponseType(typeof(FoodResponseDTO), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<FoodResponseDTO>> CreateFood([FromBody] FoodRequestDTO request)
+    public async Task InvokeAsync(HttpContext context)
     {
-        var result = await _foodService.AddFoodAsync(request);
-        return CreatedAtAction(nameof(GetFoodById), new { id = result.FoodId }, result);
+        try
+        {
+            await _next(context);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Произошла ошибка:  {Message}", ex.Message);
+            await HandleExceptionAsync(context, ex);
+        }
     }
 
-    // GET: api/food/{id}
-    [HttpGet("{id}")]
-    [ProducesResponseType(typeof(FoodResponseDTO), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<FoodResponseDTO>> GetFoodById(int id)
+    private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        var result = await _foodService.GetFoodByIdAsync(id);
-        return Ok(result);
-    }
+        context.Response.ContentType = "application/json";
 
-    // GET: api/food
-    [HttpGet]
-    [ProducesResponseType(typeof(IReadOnlyList<FoodResponseDTO>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<FoodResponseDTO>>> GetAllFoods()
-    {
-        var result = await _foodService.GetAllFoodsAsync();
-        return Ok(result);
-    }
+        var response = new ErrorResponse
+        {
+            Message = exception.Message,
+            StatusCode = 0
+        };
 
-    // PUT: api/food/{id}
-    [HttpPut("{id}")]
-    [ProducesResponseType(typeof(FoodResponseDTO), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<FoodResponseDTO>> UpdateFood(int id, [FromBody] FoodRequestDTO request)
-    {
-        var result = await _foodService.UpdateFoodAsync(id, request);
-        return Ok(result);
-    }
+        switch (exception)
+        {
+            case KeyNotFoundException: 
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                response.StatusCode = (int)HttpStatusCode.NotFound;
+                response.Message = exception.Message;
+                break;
 
-    // DELETE: api/food/{id}
-    [HttpDelete("{id}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes. Status404NotFound)]
-    public async Task<IActionResult> DeleteFood(int id)
-    {
-        await _foodService.RemoveFoodAsync(id);
-        return NoContent();
+            case InvalidOperationException:
+                context. Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+                response.Message = exception. Message;
+                break;
+
+            case ArgumentException:
+                context. Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                response.StatusCode = (int)HttpStatusCode.BadRequest;
+                response.Message = exception. Message;
+                break;
+
+            case UnauthorizedAccessException: 
+                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                response.Message = "Доступ запрещён";
+                break;
+
+            default:
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = "Произошла внутренняя ошибка сервера";
+                break;
+        }
+
+        var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+
+        await context.Response.WriteAsync(jsonResponse);
     }
+}
+
+public class ErrorResponse
+{
+    public int StatusCode { get; set; }
+    public string Message { get; set; } = string.Empty;
 }
