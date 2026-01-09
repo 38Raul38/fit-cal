@@ -6,12 +6,12 @@ namespace FitCal.Persistence.Context;
 
 public class FitCalContext : DbContext
 {
-    DbSet<UserHistory> UserHistories { get; set; }
-    DbSet<Recipe> Recipes { get; set; }
-    DbSet<RecipeIngredient> RecipeIngredients { get; set; }
-    DbSet<Food> Foods { get; set; }
-    DbSet<Report> Reports { get; set; }
-    DbSet<UserInformation> UserInformations { get; set; }
+    public DbSet<UserHistory> UserHistories { get; set; }
+    public DbSet<Recipe> Recipes { get; set; }
+    public DbSet<RecipeIngredient> RecipeIngredients { get; set; }
+    public DbSet<Food> Foods { get; set; }
+    public DbSet<Report> Reports { get; set; }
+    public DbSet<UserInformation> UserInformations { get; set; }
     
     public FitCalContext(DbContextOptions<FitCalContext> options) : base(options)
     {
