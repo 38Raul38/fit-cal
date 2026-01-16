@@ -28,5 +28,5 @@ public sealed record DailyCaloriesRequestDTO(
     DateOnly BirthDate,
     double HeightCm,
     double WeightKg,
-    double? TargetRateKgPerWeek // null для Maintain
+    double?  GoalWeightKg  // желаемый вес (null для Maintain)
 );
