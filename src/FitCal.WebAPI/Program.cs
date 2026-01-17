@@ -8,14 +8,28 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// builder.Services.AddControllers()
-//     .AddJsonOptions(o =>
-//     {
-//         // Чтобы enum приходили/уходили строками: "MaintainWeight", "Active"
-//         o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-//     });
+// CORS Configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:5173",  // Vite dev server
+                "http://localhost:3000"   // На случай если используете другой порт
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+    {
+        // Чтобы enum приходили/уходили строками: "MaintainWeight", "Active"
+        o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 
 builder.Services.AddOpenApi();
 
@@ -26,17 +40,22 @@ builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IUserHistoryService, UserHistoryService>();
 builder.Services.AddScoped<ICalorieCalculatorService, CalorieCalculatorService>();
+builder.Services.AddHttpClient<IFoodSearchService, FoodSearchService>();
 
 
 var app = builder.Build();
 
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
+// Enable CORS
+app.UseCors("AllowFrontend");
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
 app.MapControllers();
 
 app.MapGet("/", () => "Hello World!");

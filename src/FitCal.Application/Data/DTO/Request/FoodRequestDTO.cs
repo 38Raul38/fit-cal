@@ -1,11 +1,7 @@
 namespace FitCal.Application.Data.DTO.Response;
 
-public record FoodRequestDTO(
-    string Name,
-    double ServingSize,
-    string ServingUnit,
-    double Calories,
-    double Protein,
-    double Carbs,
-    double Fats
+public sealed record FoodRequestDTO(
+    string Name,           // Название продукта (например "pizza")
+    double? ServingSize,    // Размер порции (например 150)
+    string? ServingUnit = "g"    // Единица измерения (например "g")
 );

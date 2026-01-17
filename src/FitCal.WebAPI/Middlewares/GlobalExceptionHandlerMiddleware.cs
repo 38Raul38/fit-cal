@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using System.Text.Json;
+using System. Text.Json;
 
 public class GlobalExceptionHandlerMiddleware
 {
@@ -39,22 +39,29 @@ public class GlobalExceptionHandlerMiddleware
 
         switch (exception)
         {
-            case KeyNotFoundException: 
+            case KeyNotFoundException:  
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                response.StatusCode = (int)HttpStatusCode.NotFound;
+                response. StatusCode = (int)HttpStatusCode.NotFound;
                 response.Message = exception.Message;
                 break;
 
             case InvalidOperationException:
-                context. Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
-                response.Message = exception. Message;
+                response.Message = exception.Message;
+                break;
+
+            case ArgumentException when exception.Message.Contains("infinity") || exception.Message.Contains("Infinity"):
+                // ✅ Специальная обработка для Infinity-ошибок
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                response. StatusCode = (int)HttpStatusCode.InternalServerError;
+                response.Message = "Ошибка расчёта данных:  получено некорректное значение.  Проверьте входные данные.";
                 break;
 
             case ArgumentException:
-                context. Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                context.Response. StatusCode = (int)HttpStatusCode.BadRequest;
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
-                response.Message = exception. Message;
+                response.Message = exception.Message;
                 break;
 
             case UnauthorizedAccessException: 
@@ -64,7 +71,7 @@ public class GlobalExceptionHandlerMiddleware
                 break;
 
             default:
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                context.Response. StatusCode = (int)HttpStatusCode.InternalServerError;
                 response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 response.Message = "Произошла внутренняя ошибка сервера";
                 break;
