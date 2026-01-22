@@ -1,22 +1,15 @@
 using FitCal.Application.Data.DTO.Request;
 using FitCal.Application.Data.DTO.Response;
 
-namespace FitCal.Application.Services.Interfaces;
-
 public interface IFoodService
 {
-    // Добавить новый продукт, вернуть продукт с FoodId
-    Task<FoodResponseDTO> AddFoodAsync(FoodRequestDTO food);
+    Task<FoodResponseDTO> AddFoodAsync(Guid authUserId, FoodRequestDTO food);
 
-    // Получить продукт по FoodId
-    Task<FoodResponseDTO> GetFoodByIdAsync(int foodId);
+    Task<FoodResponseDTO> GetFoodByIdAsync(Guid authUserId, int foodId);
 
-    // Получить список всех продуктов
-    Task<IReadOnlyList<FoodResponseDTO>> GetAllFoodsAsync();
+    Task<IReadOnlyList<FoodResponseDTO>> GetAllFoodsAsync(Guid authUserId);
 
-    // Обновить продукт по FoodId, вернуть обновлённый продукт
-    Task<FoodResponseDTO> UpdateFoodAsync(int foodId, FoodRequestDTO food);
+    Task<FoodResponseDTO> UpdateFoodAsync(Guid authUserId, int foodId, FoodRequestDTO food);
 
-    // Удалить продукт по FoodId
-    Task RemoveFoodAsync(int foodId);
+    Task RemoveFoodAsync(Guid authUserId, int foodId);
 }

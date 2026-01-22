@@ -13,6 +13,8 @@ public class Food
     public double Carbs { get; set; }
     public double Fats { get; set; }
     
+    public Guid OwnerAuthUserId { get; set; }
+    
     // Связь с UserHistory
     public virtual ICollection<UserHistory> UserHistories { get; set; } = [];
 

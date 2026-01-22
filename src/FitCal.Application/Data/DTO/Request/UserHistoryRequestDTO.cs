@@ -1,7 +1,6 @@
-namespace FitCal.Application.Data.DTO.Response;
+namespace FitCal.Application.Data.DTO.Request;
 
 public record UserHistoryRequestDTO(
     DateTime JournalDate,
-    int FoodId,
-    int UserInformationId
+    int FoodId
 );

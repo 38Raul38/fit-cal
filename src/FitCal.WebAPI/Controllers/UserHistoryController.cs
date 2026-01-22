@@ -1,10 +1,13 @@
-﻿using FitCal.Application.Data.DTO.Request;
+﻿using System.Security.Claims;
+using FitCal.Application.Data.DTO.Request;
 using FitCal.Application.Data.DTO.Response;
 using FitCal.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FitCal.WebAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class UserHistoryController : ControllerBase
@@ -16,18 +19,27 @@ public class UserHistoryController : ControllerBase
         _userHistoryService = userHistoryService;
     }
 
-    // POST: api/userhistory
+    private Guid GetAuthUserId()
+    {
+        var idStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(idStr, out var authUserId))
+            throw new UnauthorizedAccessException("Invalid user id");
+
+        return authUserId;
+    }
+
     [HttpPost]
     [ProducesResponseType(typeof(UserHistoryResponseDTO), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserHistoryResponseDTO>> CreateUserHistoryRecord([FromBody] UserHistoryRequestDTO request)
     {
-        var result = await _userHistoryService.AddUserHistoryRecordAsync(request);
+        var authUserId = GetAuthUserId();
+        var result = await _userHistoryService.AddUserHistoryRecordAsync(authUserId, request);
         return CreatedAtAction(nameof(GetUserHistoryRecordById), new { id = result.UserHistoryId }, result);
     }
 
-    // GET: api/userhistory/{id}
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(UserHistoryResponseDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -37,40 +49,35 @@ public class UserHistoryController : ControllerBase
         return Ok(result);
     }
 
-    // GET:  api/userhistory/user/{userInformationId}
-    [HttpGet("user/{userInformationId}")]
+    [HttpGet("me")]
     [ProducesResponseType(typeof(IReadOnlyList<UserHistoryResponseDTO>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<UserHistoryResponseDTO>>> GetUserHistory(int userInformationId)
+    public async Task<ActionResult<IReadOnlyList<UserHistoryResponseDTO>>> GetMyUserHistory()
     {
-        var result = await _userHistoryService.GetUserHistoryAsync(userInformationId);
+        var authUserId = GetAuthUserId();
+        var result = await _userHistoryService.GetUserHistoryAsync(authUserId);
         return Ok(result);
     }
 
-    // GET: api/userhistory/user/{userInformationId}/date/{date}
-    [HttpGet("user/{userInformationId}/date/{date}")]
+    [HttpGet("me/date/{date}")]
     [ProducesResponseType(typeof(IReadOnlyList<UserHistoryResponseDTO>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<IReadOnlyList<UserHistoryResponseDTO>>> GetUserHistoryByDate(
-        int userInformationId, 
-        string date)
+    public async Task<ActionResult<IReadOnlyList<UserHistoryResponseDTO>>> GetMyUserHistoryByDate(string date)
     {
-        // Парсим дату из строки (формат: yyyy-MM-dd)
         if (!DateTime.TryParse(date, out var parsedDate))
-        {
-            throw new ArgumentException("Неверный формат даты.  Используйте yyyy-MM-dd");
-        }
+            throw new ArgumentException("Неверный формат даты. Используйте yyyy-MM-dd");
 
-        var result = await _userHistoryService.GetUserHistoryByDateAsync(userInformationId, parsedDate);
+        var authUserId = GetAuthUserId();
+        var result = await _userHistoryService.GetUserHistoryByDateAsync(authUserId, parsedDate);
         return Ok(result);
     }
 
-    // DELETE: api/userhistory/{id}
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteUserHistoryRecord(int id)
     {
-        await _userHistoryService. RemoveUserHistoryRecordAsync(id);
+        var authUserId = GetAuthUserId();
+        await _userHistoryService.RemoveUserHistoryRecordAsync(authUserId, id);
         return NoContent();
     }
 }

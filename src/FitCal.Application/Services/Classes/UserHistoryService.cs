@@ -16,104 +16,111 @@ public class UserHistoryService : IUserHistoryService
         _context = context;
     }
 
-    // Добавить запись в историю
-    public async Task<UserHistoryResponseDTO> AddUserHistoryRecordAsync(UserHistoryRequestDTO recordRequest)
+    public async Task<UserHistoryResponseDTO> AddUserHistoryRecordAsync(Guid authUserId, UserHistoryRequestDTO record)
     {
-        // Валидация:  проверяем, что пользователь существует
-        var userExists = await _context.UserInformations
-            .AnyAsync(u => u.UserInformationId == recordRequest.UserInformationId);
+        var userInfoId = await _context.UserInformations
+            .Where(x => x.AuthUserId == authUserId)
+            .Select(x => x.UserInformationId)
+            .FirstOrDefaultAsync();
 
-        if (!userExists)
-        {
-            throw new KeyNotFoundException($"Пользователь с ID {recordRequest.UserInformationId} не найден");
-        }
+        if (userInfoId == 0)
+            throw new KeyNotFoundException("UserInformation для текущего пользователя не найден");
 
-        // Валидация: проверяем, что продукт существует
-        var foodExists = await _context.Foods
-            .AnyAsync(f => f.FoodId == recordRequest.FoodId);
-
+        var foodExists = await _context.Foods.AnyAsync(f => f.FoodId == record.FoodId);
         if (!foodExists)
-        {
-            throw new KeyNotFoundException($"Продукт с ID {recordRequest.FoodId} не найден");
-        }
+            throw new KeyNotFoundException($"Продукт с ID {record.FoodId} не найден");
 
-        var userHistory = new UserHistory
+        var entity = new UserHistory
         {
-            JournalDate = recordRequest.JournalDate,
-            FoodId = recordRequest.FoodId,
-            UserInformationId = recordRequest.UserInformationId
+            JournalDate = record.JournalDate,
+            FoodId = record.FoodId,
+            UserInformationId = userInfoId
         };
 
-        _context.UserHistories.Add(userHistory);
+        _context.UserHistories.Add(entity);
         await _context.SaveChangesAsync();
 
-        return await GetUserHistoryRecordByIdAsync(userHistory.UserHistoryId);
+        return await GetUserHistoryRecordByIdAsync(entity.UserHistoryId);
     }
 
-    // Получить запись по ID
     public async Task<UserHistoryResponseDTO> GetUserHistoryRecordByIdAsync(int userHistoryId)
     {
-        var userHistory = await _context.UserHistories
-            . Include(uh => uh.Food)
-            .FirstOrDefaultAsync(uh => uh.UserHistoryId == userHistoryId);
+        var entity = await _context.UserHistories
+            .Include(x => x.Food)
+            .FirstOrDefaultAsync(x => x.UserHistoryId == userHistoryId);
 
-        if (userHistory == null)
-        {
+        if (entity == null)
             throw new KeyNotFoundException($"Запись истории с ID {userHistoryId} не найдена");
-        }
 
-        return MapToResponseDto(userHistory);
+        return MapToResponseDto(entity);
     }
 
-    // Получить все записи пользователя
-    public async Task<IReadOnlyList<UserHistoryResponseDTO>> GetUserHistoryAsync(int userInformationId)
+    public async Task<IReadOnlyList<UserHistoryResponseDTO>> GetUserHistoryAsync(Guid authUserId)
     {
-        var userHistories = await _context. UserHistories
-            .Where(uh => uh.UserInformationId == userInformationId)
-            .Include(uh => uh.Food)
-            .OrderByDescending(uh => uh.JournalDate)
+        var userInfoId = await _context.UserInformations
+            .Where(x => x.AuthUserId == authUserId)
+            .Select(x => x.UserInformationId)
+            .FirstOrDefaultAsync();
+
+        if (userInfoId == 0)
+            return [];
+
+        var list = await _context.UserHistories
+            .Where(x => x.UserInformationId == userInfoId)
+            .Include(x => x.Food)
+            .OrderByDescending(x => x.JournalDate)
             .ToListAsync();
 
-        return userHistories.Select(MapToResponseDto).ToList();
+        return list.Select(MapToResponseDto).ToList();
     }
 
-    // Получить записи за конкретную дату
-    public async Task<IReadOnlyList<UserHistoryResponseDTO>> GetUserHistoryByDateAsync(int userInformationId, DateTime journalDate)
+    public async Task<IReadOnlyList<UserHistoryResponseDTO>> GetUserHistoryByDateAsync(Guid authUserId, DateTime journalDate)
     {
-        // Сравниваем только дату без времени
+        var userInfoId = await _context.UserInformations
+            .Where(x => x.AuthUserId == authUserId)
+            .Select(x => x.UserInformationId)
+            .FirstOrDefaultAsync();
+
+        if (userInfoId == 0)
+            return [];
+
         var dateOnly = journalDate.Date;
 
-        var userHistories = await _context.UserHistories
-            . Where(uh => uh. UserInformationId == userInformationId 
-                      && uh.JournalDate.Date == dateOnly)
-            .Include(uh => uh.Food)
-            .OrderBy(uh => uh.JournalDate)
+        var list = await _context.UserHistories
+            .Where(x => x.UserInformationId == userInfoId && x.JournalDate.Date == dateOnly)
+            .Include(x => x.Food)
+            .OrderBy(x => x.JournalDate)
             .ToListAsync();
 
-        return userHistories.Select(MapToResponseDto).ToList();
+        return list.Select(MapToResponseDto).ToList();
     }
 
-    // Удалить запись
-    public async Task RemoveUserHistoryRecordAsync(int userHistoryId)
+    public async Task RemoveUserHistoryRecordAsync(Guid authUserId, int userHistoryId)
     {
-        var userHistory = await _context.UserHistories. FindAsync(userHistoryId);
+        var userInfoId = await _context.UserInformations
+            .Where(x => x.AuthUserId == authUserId)
+            .Select(x => x.UserInformationId)
+            .FirstOrDefaultAsync();
 
-        if (userHistory == null)
-        {
+        if (userInfoId == 0)
+            throw new KeyNotFoundException("UserInformation для текущего пользователя не найден");
+
+        var entity = await _context.UserHistories
+            .FirstOrDefaultAsync(x => x.UserHistoryId == userHistoryId && x.UserInformationId == userInfoId);
+
+        if (entity == null)
             throw new KeyNotFoundException($"Запись истории с ID {userHistoryId} не найдена");
-        }
 
-        _context.UserHistories.Remove(userHistory);
+        _context.UserHistories.Remove(entity);
         await _context.SaveChangesAsync();
     }
 
-    // Маппинг UserHistory -> UserHistoryResponseDTO
     private static UserHistoryResponseDTO MapToResponseDto(UserHistory userHistory)
     {
         var food = userHistory.Food;
         var foodDto = new FoodResponseDTO(
-            food. FoodId,
-            food. Name,
+            food.FoodId,
+            food.Name,
             food.ServingSize,
             food.ServingUnit,
             food.Calories,

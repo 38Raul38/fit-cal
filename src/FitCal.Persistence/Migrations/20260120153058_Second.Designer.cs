@@ -3,6 +3,7 @@ using System;
 using FitCal.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FitCal.Persistence.Migrations
 {
     [DbContext(typeof(FitCalContext))]
-    partial class FitCalContextModelSnapshot : ModelSnapshot
+    [Migration("20260120153058_Second")]
+    partial class Second
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,9 +47,6 @@ namespace FitCal.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<Guid>("OwnerAuthUserId")
-                        .HasColumnType("uuid");
-
                     b.Property<double>("Protein")
                         .HasColumnType("double precision");
 
@@ -58,8 +58,6 @@ namespace FitCal.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("FoodId");
-
-                    b.HasIndex("OwnerAuthUserId");
 
                     b.ToTable("Foods");
                 });

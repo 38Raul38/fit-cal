@@ -2,6 +2,7 @@
 
 public class UserInformation
 {
+    public Guid AuthUserId { get; set; }
     public int UserInformationId { get; set; }
     public DateTime BirthDate { get; set; }
     public string Gender { get; set; }

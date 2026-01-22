@@ -8,6 +8,8 @@ public class UserInformationConfiguration : IEntityTypeConfiguration<UserInforma
 {
     public void Configure(EntityTypeBuilder<UserInformation> builder)
     {
+        builder.Property(ui => ui.AuthUserId).IsRequired();
+        builder.HasIndex(ui => ui.AuthUserId).IsUnique();
         builder.HasKey(ui => ui.UserInformationId);
         builder.Property(ui => ui.BirthDate);
         builder.Property(ui => ui.Gender).IsRequired();
