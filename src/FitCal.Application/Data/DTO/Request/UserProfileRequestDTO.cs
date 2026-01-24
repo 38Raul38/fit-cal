@@ -1,4 +1,4 @@
-namespace FitCal.Application.Data.DTO.Response;
+namespace FitCal.Application.Data.DTO.Request;
 
 public record UserProfileRequestDTO(
     DateTime BirthDate,
@@ -6,5 +6,9 @@ public record UserProfileRequestDTO(
     double Height,
     double Weight,
     double WeightGoal,
-    string ActivityLevel
+    string ActivityLevel,
+    double DailyCalories,
+    double Protein,
+    double Fats,
+    double Carbs
 );

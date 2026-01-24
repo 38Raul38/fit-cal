@@ -10,6 +10,10 @@ public class UserInformation
     public double Weight { get; set; }
     public double WeightGoal { get; set; }
     public string ActivityLevel { get; set; }
+    public double DailyCalories { get; set; }
+    public double Protein { get; set; }
+    public double Fats { get; set; }
+    public double Carbs { get; set; }
     
     
     // Связь с историей питания

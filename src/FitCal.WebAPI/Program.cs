@@ -18,6 +18,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:5173",  // Vite dev server
+                "http://localhost:5173",
                 "http://localhost:3000"   // На случай если используете другой порт
             )
             .AllowAnyHeader()
@@ -44,6 +45,7 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IUserHistoryService, UserHistoryService>();
 builder.Services.AddScoped<ICalorieCalculatorService, CalorieCalculatorService>();
 builder.Services.AddHttpClient<IFoodSearchService, FoodSearchService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 
 
 builder.Services.AddAuthentication(options =>

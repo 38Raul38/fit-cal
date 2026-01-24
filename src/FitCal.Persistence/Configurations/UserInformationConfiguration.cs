@@ -17,5 +17,9 @@ public class UserInformationConfiguration : IEntityTypeConfiguration<UserInforma
         builder.Property(ui => ui.Weight).IsRequired();
         builder.Property(ui => ui.WeightGoal).IsRequired();
         builder.Property(ui => ui.ActivityLevel).IsRequired();
+        builder.Property(ui => ui.DailyCalories).IsRequired();
+        builder.Property(ui => ui.Protein).IsRequired();
+        builder.Property(ui => ui.Fats).IsRequired();
+        builder.Property(ui => ui.Carbs).IsRequired();
     }
 }

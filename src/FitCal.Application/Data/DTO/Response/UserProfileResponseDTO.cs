@@ -1,4 +1,4 @@
-namespace FitCal.Application.Data.DTO.Request;
+namespace FitCal.Application.Data.DTO.Response;
 
 public record UserProfileResponseDTO(
     int UserInformationId,
