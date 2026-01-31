@@ -17,9 +17,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
+                "http://localhost",
                 "http://localhost:5173",  // Vite dev server
-                "http://localhost:5173",
-                "http://localhost:3000"   // На случай если используете другой порт
+                "http://localhost:5174",
+                "http://localhost:3000",   // На случай если используете другой порт
+                "http://fitcal-service-ui:80",
+                "http://localhost:80"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -90,5 +93,11 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapGet("/", () => "Hello World!");
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<FitCalContext>();
+    dbContext.Database.Migrate();
+}
 
 app.Run();
